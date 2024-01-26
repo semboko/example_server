@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from uvicorn import run
 
-from endpoints.auth import router
+from endpoints.auth import router as auth_router
+from endpoints.chat import router as chat_router
 
 app = FastAPI()
 
-app.include_router(router)
+app.include_router(auth_router)
+app.include_router(chat_router)
 
 
 if __name__ == "__main__":

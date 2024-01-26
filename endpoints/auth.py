@@ -2,6 +2,7 @@ from hashlib import sha256
 from secrets import token_hex
 
 from fastapi import APIRouter, HTTPException, status
+from managers.auth import AuthManager, AuthError
 
 from db import database
 from schema import Credentials
@@ -12,13 +13,12 @@ router = APIRouter(prefix="/auth")
 @router.post("/signup")
 def signup(body: Credentials) -> bool:
     login, password = body.login, body.password
-    res = database.get("user:" + login)
-    if res is not None:
+
+    am = AuthManager()
+    try:
+        am.signup(login, password)
+    except AuthError:
         raise HTTPException(status.HTTP_400_BAD_REQUEST)
-    hashed_password = sha256(password.encode("UTF-8")).hexdigest()
-    key = "user:" + login
-    value = hashed_password
-    database.set(key, value)
     return True
 
 
@@ -33,6 +33,5 @@ def signin(body: Credentials) -> str:
 
     token = token_hex(16)
 
-    database.set("session:" + token, body.login)
-
+    res = database.set("session:" + token, body.login, ex=24 * 60 * 60)
     return token

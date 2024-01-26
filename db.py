@@ -1,6 +1,5 @@
 from redis import Redis, exceptions
 
-
 database = Redis(host="178.62.216.119", port=4567, decode_responses=True)
 
 try:
